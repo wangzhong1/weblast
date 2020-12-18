@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wz.dao.CatalogDao">
+    <resultMap id="BaseResultMap" type="wz.vo.Catalog">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="pId" jdbcType="INTEGER" property="pId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="type" javaType="INTEGER" property="type"/>
+    </resultMap>
+
+    <select id="selectCatalogOne" resultMap="BaseResultMap">
+        select * from `catalog` where type = 1
+    </select>
+
+    <select id="selectCatalogTwoByPid" resultMap="BaseResultMap">
+        select * from `catalog` where pId =  #{pId} and type = 2
+    </select>
+
+</mapper>
