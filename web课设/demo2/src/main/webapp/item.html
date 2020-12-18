@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link type="text/css" rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="./js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="./js/vue.js"></script>
+    <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
+</head>
+<style>
+    .myInput{
+        width: 300px;
+        display: inline;
+        margin-left: 60px;
+        margin-top: 40px;
+    }
+</style>
+<body>
+    <div id="app" style="width: 980px; height: 100%; margin: 0 auto; text-align: center">
+        <!--{{item}}-->
+        <p style="height: 40px; width: 100%; background-color: blue; color: white; text-align: center; line-height: 40px; margin-top: 20px">商品信息</p>
+        <ul class="nav nav-tabs">
+            <li role="presentation" class="active"><a href="#">基本信息</a></li>
+            <li role="presentation"><a href="#">其他信息</a></li>
+        </ul>
+
+            商品货号 <input type="text" class="form-control myInput" placeholder="请输入商品货号" v-model="item.itemNo" v-on:blur="onBlurItemNo()">
+            条形码 <input type="text" class="form-control myInput" placeholder="请输入条形码" v-model="item.barcode" v-on:blur="onBlurBarcode()"><br>
+            <span style="margin-left: 200px; float: left; color: red" v-show="checkItem.checkItemNo"> {{checkItem.checkItemNo}}</span>
+            <span style="margin-right: 260px; float: right; color: red" v-if="checkItem.checkBarcode"> {{checkItem.checkBarcode}}</span><br>
+            商品中文名称 <input type="text" class="form-control myInput" placeholder="请输入商品中文名称" style="width: 700px" v-model="item.chName"><br>
+            <span style="margin-left: 220px; float: left;color: red" v-if="checkItem.checkChName">{{checkItem.checkChName}}</span><br>
+            产地    <select class="myInput" style="height: 38px;" v-model="item.productionAreaId">
+                        <option value="0" selected>请选择</option>
+                        <option v-for="productionArea in productionAreas" v-bind:value="productionArea.id">
+                            {{ productionArea.name}}
+                        </option>
+                    </select>
+            计量单位  <select class="myInput" style="height: 38px;" v-model="item.meteringId">
+                        <option value="0" selected>请选择</option>
+                        <option v-for="metering in meterings" v-bind:value="metering.id">
+                            {{ metering.name}}
+                        </option>
+                      </select>  <br>
+            <span style="margin-left: 180px; float: left;color: red" v-if="checkItem.checkProductionAreaId"> {{checkItem.checkProductionAreaId}}</span>
+            <span style="margin-right: 250px; float: right;color: red" v-if="checkItem.checkMeteringId"> {{checkItem.checkMeteringId}}</span><br>
+            一级目录  <select class="myInput" style="height: 38px;" v-model="item.oneCatalogId">
+                        <option value="0" selected>请选择</option>
+                        <option v-for="oneCatalog in oneCatalogs" v-bind:value="oneCatalog.id">
+                            {{ oneCatalog.name}}
+                        </option>
+                      </select>
+            二级目录  <select class="myInput" style="height: 38px;" v-model="item.twoCatalogId">
+                        <option value="0" selected>请选择</option>
+                        <option v-for="twoCatalog in twoCatalogs" v-bind:value="twoCatalog.id">
+                            {{ twoCatalog.name}}
+                        </option>
+                      </select> <br>
+            <span style="margin-left: 200px; float: left;color: red" v-if="checkItem.checkOneCatalogId"> {{checkItem.checkOneCatalogId}}</span>
+            <span style="margin-right: 250px; float: right;color: red" v-if="checkItem.checkTwoCatalogId"> {{checkItem.checkTwoCatalogId}}</span><br>
+        <div style="margin-top: 20px; margin-right: 20px; width: 400px; float: right">
+            <button type="button" class="btn btn-primary" @click="saveItem()">商品保存</button>
+            <button type="button" class="btn btn-primary">取消</button>
+            <button type="button" class="btn btn-primary">退出</button>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            item :{
+                itemNo:"",
+                barcode:"",
+                chName:"",
+                productionAreaId:0,
+                meteringId:0,
+                oneCatalogId:0,
+                twoCatalogId:0
+            },
+            checkItem :{
+                checkItemNo:"",
+                checkBarcode:"",
+                checkChName:"",
+                checkProductionAreaId:"",
+                checkMeteringId:"",
+                checkOneCatalogId:"",
+                checkTwoCatalogId:""
+            },
+            oneCatalogs:"",
+            twoCatalogs:[],
+            meterings:[],
+            productionAreas:[]
+        },
+        watch : {
+            "item.oneCatalogId" : function (val, oldVal) {
+                this.queryCatalogTwoByPid(val);
+            }
+        },
+        methods:{
+            // 发送请求获取资源
+
+            // 发送请求获取资源
+            queryMeterings:function () {
+                $.ajax({
+                    url:"/selectMeterings",
+                    type:"GET",
+                    data:"",
+                    success:function(result){
+                        vue.meterings = result;
+                    }
+                });
+            },
+            // 发送请求获取资源
+            queryProductionAreas:function () {
+                $.ajax({
+                    url:"/selectProductionAreas",
+                    type:"GET",
+                    data:"",
+                    success:function(result){
+                        vue.productionAreas = result;
+                    }
+                });
+            },
+            queryOneCatalogs:function () {
+                $.ajax({
+                    url:"/selectCatalogOne",
+                    type:"GET",
+                    data:"",
+                    success:function(result){
+                        console.log(result);
+                        vue.oneCatalogs = result;
+                    }
+                });
+            },
+            // 查询二级栏目
+            queryCatalogTwoByPid:function (val) {
+                $.ajax({
+                    url:"/selectCatalogTwoByPid",
+                    type:"GET",
+                    data:"pId="+val,
+                    success:function(result){
+                        vue.twoCatalogs = result;
+                    }
+                });
+            },
+            // 验证
+            onBlurItemNo:function () {
+                if(this.item.itemNo == ""){
+                    this.checkItem.checkItemNo = "请输入货号";
+                    return
+                }
+                $.ajax({
+                    url:"/checkItemNo",
+                    type:"GET",
+                    data:"itemNo="+this.item.itemNo,
+                    success:function(result){
+                        if(result != 0){
+                            vue.checkItem.checkItemNo = "货号已经存在！";
+                        }else{
+                            vue.checkItem.checkItemNo = "";
+                        }
+                    }
+                });
+            },
+            onBlurBarcode:function () {
+                // alert(this.item.barcode)
+                if(this.item.barcode == ""){
+                    this.checkItem.checkBarcode = "请输入条形码";
+                    return
+                }
+                $.ajax({
+                    url:"/checkBarcode",
+                    type:"GET",
+                    data:"barcode="+this.item.barcode,
+                    success:function(result){
+                        if(result != 0){
+                            vue.checkItem.checkBarcode = "条形码已经存在！";
+                        }else{
+                            vue.checkItem.checkBarcode = "";
+                        }
+                    }
+                });
+            },
+            // 保存商品
+            saveItem:function () {
+                var flag = true;
+                if(this.checkItem.checkItemNo != ""){
+                    flag = false;
+                }
+                if(this.checkItem.checkBarcode != ""){
+                    flag = false;
+                }
+                if(this.item.chName == ""){
+                    vue.checkItem.checkChName = "请输入商品名称！"
+                    flag = false;
+                }else{
+                    vue.checkItem.checkChName = "";
+                }
+                if(this.item.productionAreaId == ""){
+                    vue.checkItem.checkProductionAreaId = "请选择产地！"
+                    flag = false;
+                }else{
+                    vue.checkItem.checkProductionAreaId = "";
+                }
+                if(this.item.meteringId == ""){
+                    vue.checkItem.checkMeteringId = "请选择计量单位！"
+                    flag = false;
+                }else{
+                    vue.checkItem.checkMeteringId = "";
+                }
+                if(this.item.oneCatalogId == ""){
+                    vue.checkItem.checkOneCatalogId = "请选择一级目录！"
+                    flag = false;
+                }else{
+                    vue.checkItem.checkOneCatalogId = "";
+                }
+                if(this.item.twoCatalogId == ""){
+                    vue.checkItem.checkTwoCatalogId = "请选择二级目录！"
+                    flag = false;
+                }else{
+                    vue.checkItem.checkTwoCatalogId = "";
+                }
+                if(flag == true){
+                    $.ajax({
+                        url:"/insertItem",
+                        type:"GET",
+                        data:vue.item,
+                        success:function(result){
+                            alert("商品保存成功!")
+                            vue.item = [];
+                        }
+                    });
+                }
+            }
+
+        },
+        mounted:function () {
+          this.queryMeterings();
+          this.queryProductionAreas();
+          this.queryOneCatalogs();
+        }
+    })
+
+</script>
+</html>
